@@ -1,0 +1,11 @@
+<% if @current_user%>
+<h1><%= @current_user.name %></h1>
+<h2><%= @current_user.email %></h2>
+<%= link_to "Log out", logout_path, method: "delete" %>
+
+<% else %>
+
+<h1>Please log in</h1>
+<%= link_to "Log in", new_session_path %>
+
+<% end %>
