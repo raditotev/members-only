@@ -1,0 +1,15 @@
+<% if @current_user %>
+<%= link_to "New post", new_post_path%>
+<%= link_to "Log out", logout_path, method: "delete" %>
+<% end %>
+<% @posts.each do |post| %>
+    <h1><%= post.title %></h1>
+    <% if @current_user %>
+    <p>by <%= post.user.name %></p>
+    <% else %>
+    <p>To see author name <%= link_to "Log in", new_session_path %></p>
+    <% end %>
+    <p><%= post.content %></p>
+<% end %>
+
+

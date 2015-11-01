@@ -3,6 +3,8 @@ class User < ActiveRecord::Base
   before_create :create_remember_token
   has_secure_password
 
+  has_many :posts
+
   def User.new_token
     SecureRandom.urlsafe_base64
   end
@@ -21,7 +23,7 @@ class User < ActiveRecord::Base
     Digest::SHA1.hexdigest(remember_token) == self.remember_digest
   end
 
-  def forget
+  def delete_remember_token
     update_attribute(:remember_digest, nil)
   end
 

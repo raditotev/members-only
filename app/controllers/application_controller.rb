@@ -14,9 +14,9 @@ class ApplicationController < ActionController::Base
   end
 
   def current_user
-    # if (user_id = session[:user_id])
-    #   @current_user ||= User.find_by(id: user_id)
-    if (user_id = cookies.signed[:user_id])
+    if (user_id = session[:user_id])
+      @current_user ||= User.find_by(id: user_id)
+    elsif (user_id = cookies.signed[:user_id])
       user = User.find_by(id: user_id)
       if user && user.authenticated?(cookies[:remember_token])
         log_in user
@@ -26,7 +26,7 @@ class ApplicationController < ActionController::Base
   end
 
   def forget(user)
-    user.forget
+    user.delete_remember_token
     cookies.delete(:user_id)
     cookies.delete(:remember_token)
   end
@@ -35,6 +35,16 @@ class ApplicationController < ActionController::Base
     forget(current_user)
     session.delete(:user_id)
     @current_user = nil
+  end
+
+def logged_in?
+    !current_user.nil?
+  end
+
+  def logged_in_user
+    unless logged_in?
+      redirect_to new_session_path
+    end
   end
 
 end
