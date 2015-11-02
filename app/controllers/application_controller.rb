@@ -2,42 +2,28 @@ class ApplicationController < ActionController::Base
   # Prevent CSRF attacks by raising an exception.
   # For APIs, you may want to use :null_session instead.
   protect_from_forgery with: :exception
+  helper_method :logged_in?, :current_user
 
   def log_in(user)
-    session[:user_id] = user.id
+    remember_token = User.new_remember_token
+    cookies.permanent[:remember_token] = remember_token
+    user.update_attribute(:remember_digest, User.digest(remember_token))
+    self.current_user = user
+    puts "Hey login method is called from SEssion controller!!!!!!!!!!!!!!!!"
   end
 
-  def remember(user)
-    user.create_remember_token
-    cookies.permanent.signed[:user_id] = user.id
-    cookies.permanent[:remember_token] = user.remember_token
+  def current_user=(user)
+    @current_user = user
   end
 
   def current_user
-    if (user_id = session[:user_id])
-      @current_user ||= User.find_by(id: user_id)
-    elsif (user_id = cookies.signed[:user_id])
-      user = User.find_by(id: user_id)
-      if user && user.authenticated?(cookies[:remember_token])
-        log_in user
-        @current_user = user
-      end
+    remember_token = cookies[:remember_token]
+    if remember_token
+      @current_user ||= User.find_by(remember_digest: User.digest(remember_token))
     end
   end
 
-  def forget(user)
-    user.delete_remember_token
-    cookies.delete(:user_id)
-    cookies.delete(:remember_token)
-  end
-
-  def log_out
-    forget(current_user)
-    session.delete(:user_id)
-    @current_user = nil
-  end
-
-def logged_in?
+  def logged_in?
     !current_user.nil?
   end
 
@@ -47,4 +33,9 @@ def logged_in?
     end
   end
 
+  def logout(user)
+    user.update_attribute(:remember_digest, nil)
+    cookies.delete(:remember_token)
+    self.current_user = nil
+  end
 end

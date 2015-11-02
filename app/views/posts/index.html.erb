@@ -1,15 +1,23 @@
-<% if @current_user %>
-<%= link_to "New post", new_post_path%>
-<%= link_to "Log out", logout_path, method: "delete" %>
-<% end %>
-<% @posts.each do |post| %>
-    <h1><%= post.title %></h1>
-    <% if @current_user %>
-    <p>by <%= post.user.name %></p>
-    <% else %>
-    <p>To see author name <%= link_to "Log in", new_session_path %></p>
-    <% end %>
+<% if logged_in? %>
+  <h1>Authorized members section</h1>
+  <span>Welcome, <%= current_user.name %></span>
+  <span><%= link_to "Create post", new_post_path %></span>
+  <span><%= link_to "Sign Out", session_path(current_user), method: "delete" %></span>
+  <h2>Posts</h2>
+  <% @posts.each do |post| %>
+    <h3><%= post.title %></h3>
+    <span>Posted by <%= post.user.name %></span>
     <p><%= post.content %></p>
+  <% end %>
+<% else %>
+  <h1>Unauthorized members section</h1>
+  <p>
+    To see post authors please
+    <%= link_to "Log in", new_session_path %>
+  </p>
+  <h2>Posts</h2>
+  <% @posts.each do |post| %>
+    <h3><%= post.title %></h3>
+    <p><%= post.content %></p>
+  <% end %>
 <% end %>
-
-

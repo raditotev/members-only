@@ -1,11 +1,12 @@
 class User < ActiveRecord::Base
   attr_accessor :remember_token
-  before_create :create_remember_token
+  before_create :create_remember_digest
   has_secure_password
+  validates :password_digest, presence: true, length: { minimum:6 }
 
   has_many :posts
 
-  def User.new_token
+  def User.new_remember_token
     SecureRandom.urlsafe_base64
   end
 
@@ -13,18 +14,12 @@ class User < ActiveRecord::Base
     Digest::SHA1.hexdigest(string)
   end
 
-  def create_remember_token
-    self.remember_token = User.new_token
-    update_attribute(:remember_digest, User.digest(remember_token))
-  end
+  private
 
-  def authenticated?(remember_token)
-    return false if self.remember_digest.nil?
-    Digest::SHA1.hexdigest(remember_token) == self.remember_digest
-  end
-
-  def delete_remember_token
-    update_attribute(:remember_digest, nil)
+  def create_remember_digest
+    self.remember_token = new_remember_token
+    remember_digest = USer.digest(remember_token)
+    update_attribute(:remember_digest, remember_digest)
   end
 
 end
